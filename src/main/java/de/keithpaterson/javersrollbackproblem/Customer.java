@@ -45,4 +45,8 @@ public class Customer {
   public String getLastName() {
     return lastName;
   }
+
+public void setId(long i) {
+  id = i;
+}
 }
