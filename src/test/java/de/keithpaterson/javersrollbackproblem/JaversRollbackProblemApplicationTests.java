@@ -10,10 +10,13 @@ import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import jakarta.transaction.Transactional;
 
 @SpringBootTest
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
 class JaversRollbackProblemApplicationTests {
 
@@ -81,6 +84,19 @@ class JaversRollbackProblemApplicationTests {
 
 	@Test
 	void loadFive() {
+		for (int i = 0; i<120; i++) {
+			Customer c = new Customer();
+			c.setFirstName("BLA");
+			rJaversRepo.save(c);
+		}
+		assertEquals(120, rJaversRepo.count());
+		Changes c = javers.findChanges(QueryBuilder.anyDomainObject().build());
+		assertEquals(300, c.size());
+		logger.info(()-> javers.getJsonConverter().toJson(c).toString());
+	}
+
+	@Test
+	void loadSix() {
 		for (int i = 0; i<120; i++) {
 			Customer c = new Customer();
 			c.setFirstName("BLA");
