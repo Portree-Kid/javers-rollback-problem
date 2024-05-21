@@ -41,14 +41,14 @@ public class JaversRollbackProblemApplicationTestsBackupRestore {
     @Order(1)
 	@Test
 	void loadOne() {
-		for (int i = 0; i<199; i++) {
+		for (int i = 0; i<150; i++) {
 			Customer c = new Customer();
 			c.setId(i);
 			c.setFirstName("BLA_"+i);
 			javers.commit("null", c);
 		}
 		Changes c2 = javers.findChanges(QueryBuilder.anyDomainObject().withSnapshotType(SnapshotType.INITIAL).limit(1000).build());
-		assertEquals(597, c2.size());
+		assertEquals(450, c2.size());
 		logger.info(()-> javers.getJsonConverter().toJson(c2).toString());
 	}
 
@@ -57,6 +57,8 @@ public class JaversRollbackProblemApplicationTestsBackupRestore {
 	@Test
 	void loadTwo() {
 		restore();
+		Changes c2 = javers.findChanges(QueryBuilder.anyDomainObject().withSnapshotType(SnapshotType.INITIAL).limit(1000).build());
+		assertEquals(0, c2.size());
 		for (int i = 0; i<300; i++) {
 			Customer c = new Customer();
 			c.setId(i);
@@ -75,17 +77,15 @@ public class JaversRollbackProblemApplicationTestsBackupRestore {
 	 * jv_commit_pk_seq
 	 * jv_global_id_pk_seq
 	 */
-	private void restore() {
+	@Transactional(Transactional.TxType.REQUIRES_NEW)
+	public void restore() {
         em.createNativeQuery("DELETE FROM CUSTOMER").executeUpdate();
 		em.createNativeQuery("DELETE FROM jv_global_id").executeUpdate();
 		em.createNativeQuery("DELETE FROM jv_commit").executeUpdate();
 		em.createNativeQuery("DELETE FROM jv_commit_property").executeUpdate();
 		em.createNativeQuery("DELETE FROM jv_snapshot").executeUpdate();
 
-        em.createNativeQuery("alter sequence jv_commit_pk_seq  restart with 1");
-		em.createNativeQuery("alter sequence jv_global_id_pk_seq  restart with 1");
-
+        em.createNativeQuery("alter sequence jv_commit_pk_seq restart with 1").executeUpdate();
+		em.createNativeQuery("alter sequence jv_global_id_pk_seq  restart with 1").executeUpdate();
 	}
-
-
 }
