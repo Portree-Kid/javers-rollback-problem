@@ -95,7 +95,7 @@ class JaversRollbackProblemApplicationTestsSimpleCommit {
 			javers.commit("null", c);
 		}
 		Changes c2 = javers.findChanges(QueryBuilder.anyDomainObject().build());
-		assertEquals(200, c2.size());
+		assertEquals(100, c2.size());
 		logger.info(()-> javers.getJsonConverter().toJson(c2).toString());
 	}
 
